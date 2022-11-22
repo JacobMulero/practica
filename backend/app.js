@@ -102,34 +102,18 @@ app.get('/getUserCredentialsTokenIncorrecto', function (req, res) {
             const expireIn = response.data["expires_in"];
             getUserProfile(accessToken + 'sajlkdjas')
                 .then(response => {
-                    let userProfile = {
-                        firstName: response.data["localizedFirstName"],
-                        lastName: response.data["localizedLastName"],
-                        profileImageURL: response.data.profilePicture["displayImage~"].elements[0].identifiers[0].identifier
-                    };
 
-                    getUserEmail(accessToken)
-                        .then(response => {
-                            let userEmail = response.data.elements[0]["handle~"];
-                            let resStatus = 400;
-                            if (!(accessToken === null || userEmail === null)) {
-                                user = userBuilder(userProfile, userEmail);
-                                resStatus = 200;
-                            }
-                            // Here, you can implement your own login logic
-                            // to authenticate new user or register him
-                            res.status(resStatus).json({user, expireIn, accessToken});
-                        })
-                        .catch(error => console.log(error))
-
-                    // I mean, couldn't they have burried it any deeper?
                 })
-                .catch(error =>
-                    res.status(500).json({error})
+                .catch(error =>{
+                            res.status(error.response.status).json({error: error.response.data})
+                }
+
                 )
         })
-        .catch(err => {
-            res.status(500).json({err})
+        .catch((error) => {
+            if (error.response) {
+                res.status(error.response.status).json({error: error.response.data})
+            }
         })
 
 })
