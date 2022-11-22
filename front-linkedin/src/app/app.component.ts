@@ -1,6 +1,6 @@
 import {Component, HostListener, OnInit} from '@angular/core';
 import {environment} from "../environments/environment";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {map} from "rxjs";
 import {Respuesta, Usuario} from "./usuario";
 
@@ -19,6 +19,7 @@ export class AppComponent implements OnInit {
   }
   public fecha_expiracion: any;
   private code: any;
+  public token = '';
   @HostListener('window:message', ['$event'])
   onMessage(event:any) {
     if (event.data.type === 'code') {
@@ -86,12 +87,13 @@ export class AppComponent implements OnInit {
   }
 
   public postData():any {
-    this.http.post(environment.baseURL +'/publish?code=' + this.code ,{
-      title: 'Prueba',
-      text: 'texto',
-      url: 'http://google.com',
-      thumb: 'https://www.kindpng.com/picc/m/236-2366288_youtube-video-thumbnail-sample-youtube-thumbnail-template-2019.png',
-    })
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + this.token,
+    });
+    this.http.post('https://api.linkedin.com/v2/posts',{
+
+    }, {headers:headers})
 
       .subscribe(res => {
 
@@ -102,6 +104,7 @@ export class AppComponent implements OnInit {
       .pipe(map( respuesta => respuesta as Respuesta))
       .subscribe(res => {
         this.user = res.user;
+        this.token = res.accessToken;
         const t = new Date();
         t.setSeconds(t.getSeconds() + res.expireIn);
         this.fecha_expiracion = t;
@@ -109,8 +112,24 @@ export class AppComponent implements OnInit {
         // Do something with user
       });
   };
+  public getUserCredentialsIncorrecto():any {
+    this.http.get(environment.baseURL + environment.getUserCredentialsIncorrecto + '?code=' + this.code)
+      .pipe(map( respuesta => respuesta as Respuesta))
+      .subscribe(res => {
+        this.user = res.user;
+        this.token = res.accessToken;
+        const t = new Date();
+        t.setSeconds(t.getSeconds() + res.expireIn);
+        this.fecha_expiracion = t;
+        this.loggedIn = true;
+        // Do something with user
+      }, error => {
+        alert(error.message)
+      });
+  };
 
   refresh() {
     this.showPopup()
   }
+
 }

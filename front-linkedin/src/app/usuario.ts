@@ -6,5 +6,6 @@ export interface Usuario {
 }
 export interface Respuesta {
   user: Usuario,
-  expireIn: number
+  expireIn: number,
+  accessToken: string
 }

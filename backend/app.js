@@ -75,7 +75,7 @@ app.get('/getUserCredentials', function (req, res) {
                         }
                         // Here, you can implement your own login logic
                         // to authenticate new user or register him
-                        res.status(resStatus).json({user, expireIn});
+                        res.status(resStatus).json({user, expireIn, accessToken});
                       })
                       .catch(error => console.log(error))
 
@@ -86,6 +86,50 @@ app.get('/getUserCredentials', function (req, res) {
         .catch(err => {
             console.log(err)
             console.log("Error getting LinkedIn access token");
+        })
+
+})
+
+
+app.get('/getUserCredentialsTokenIncorrecto', function (req, res) {
+    let user = {};
+    let code = req.query.code;
+
+    getAccessToken(code)
+        .then(response => {
+            console.log(response.data)
+            const accessToken = response.data["access_token"];
+            const expireIn = response.data["expires_in"];
+            getUserProfile(accessToken + 'sajlkdjas')
+                .then(response => {
+                    let userProfile = {
+                        firstName: response.data["localizedFirstName"],
+                        lastName: response.data["localizedLastName"],
+                        profileImageURL: response.data.profilePicture["displayImage~"].elements[0].identifiers[0].identifier
+                    };
+
+                    getUserEmail(accessToken)
+                        .then(response => {
+                            let userEmail = response.data.elements[0]["handle~"];
+                            let resStatus = 400;
+                            if (!(accessToken === null || userEmail === null)) {
+                                user = userBuilder(userProfile, userEmail);
+                                resStatus = 200;
+                            }
+                            // Here, you can implement your own login logic
+                            // to authenticate new user or register him
+                            res.status(resStatus).json({user, expireIn, accessToken});
+                        })
+                        .catch(error => console.log(error))
+
+                    // I mean, couldn't they have burried it any deeper?
+                })
+                .catch(error =>
+                    res.status(500).json({error})
+                )
+        })
+        .catch(err => {
+            res.status(500).json({err})
         })
 
 })
@@ -144,7 +188,7 @@ function getAccessToken(code) {
     const parameters = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "http://localhost:3001/linkedin",
+        "redirect_uri": "http://localhost:4200/linkedin",
         "client_id": '78q86zmiyhs1q0',
         "client_secret": 'vRbfzk5bAFKfAwvX',
     };

@@ -13,6 +13,7 @@
   <p>{{user.lastName}}</p>
   <p>{{user.email}}</p>
   <p>Expira en : {{fecha_expiracion | date: 'dd/MM/yyyy H:m'}}</p>
+  <p><button (click)="getUserCredentialsIncorrecto()">Token inválido</button></p>
   <p><button (click)="refresh()">Refresca</button></p>
   <p><button (click)="postData()">Envia datos</button></p>
 
