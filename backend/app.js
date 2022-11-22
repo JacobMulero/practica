@@ -144,7 +144,7 @@ function getAccessToken(code) {
     const parameters = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": "http://localhost:3001/linkedin",
+        "redirect_uri": "http://localhost:4200/linkedin",
         "client_id": '78q86zmiyhs1q0',
         "client_secret": 'vRbfzk5bAFKfAwvX',
     };

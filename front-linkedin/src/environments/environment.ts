@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   LinkedInApi: {
     clientId: '78q86zmiyhs1q0',
-    redirectUrl: 'http://localhost:3001/linkedin',
+    redirectUrl: 'http://localhost:4200/linkedin',
     oauthUrl: 'https://www.linkedin.com/oauth/v2/authorization?response_type=code',
     scope: 'r_liteprofile%20r_emailaddress',
     scope_posts: 'r_liteprofile%20r_emailaddress%20w_member_social',
