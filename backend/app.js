@@ -10,43 +10,33 @@ const urlToGetLinkedInAccessToken = 'https://www.linkedin.com/oauth/v2/accessTok
 const urlToGetUserProfile = 'https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~digitalmediaAsset:playableStreams))'
 const urlToGetUserEmail = 'https://api.linkedin.com/v2/clientAwareMemberHandles?q=members&projection=(elements*(primary,type,handle~))';
 app.post('/publish', async (req, res) => {
-    const { title, text, url, thumb, id } = req.body;
-    const errors = [];
-
-    if(validator.isEmpty(title)) {
-        errors.push({ param: 'title', msg: 'Invalid value.'});
-    }
-    if(validator.isEmpty(text)) {
-        errors.push({ param: 'text', msg: 'Invalid value.'});
-    }
-    if(!validator.isURL(url)) {
-        errors.push({ param: 'url', msg: 'Invalid value.'});
-    }
-    if(!validator.isURL(thumb)) {
-        errors.push({ param: 'thumb', msg: 'Invalid value.'});
-    }
-
-    if(errors.length > 0) {
-        res.json({ errors });
-    } else {
-        const content = {
-            title: title,
-            text: text,
-            shareUrl: url,
-            shareThumbnailUrl: thumb
-        };
-
-        try {
-            getAccessToken(code)
-                .then(async response => {
-                    await publishContent(req, id, content,response.data["access_token"]);
-                    res.json({ success: 'Post published successfully.' });
-
-                })
-        } catch(err) {
-            res.json({ error: 'Unable to publish your post.' });
-        }
-    }
+    console.log(req)
+    // const { userid, token, contenido} = req.body;
+    // const errors = [];
+    //
+    // if(validator.isEmpty(userid)) {
+    //     errors.push({ param: 'title', msg: 'Invalid value.'});
+    // }
+    // if(validator.isEmpty(token)) {
+    //     errors.push({ param: 'text', msg: 'Invalid value.'});
+    // }
+    // if(validator.isEmpty(contenido)) {
+    //     errors.push({ param: 'text', msg: 'Invalid value.'});
+    // }
+    //
+    //
+    // if(errors.length > 0) {
+    //     res.json({ errors });
+    // } else {
+    //
+    //
+    //     try {
+    //         publishContent(contenido, token);
+    //         res.json({ success: 'Post published successfully.' });
+    //     } catch(err) {
+    //         res.json({ error: 'Unable to publish your post.' });
+    //     }
+    // }
 });
 app.get('/getUserCredentials', function (req, res) {
     let user = {};
@@ -59,7 +49,9 @@ app.get('/getUserCredentials', function (req, res) {
             const expireIn = response.data["expires_in"];
             getUserProfile(accessToken)
                 .then(response => {
+                    console.log(response.data)
                   let userProfile = {
+                    id: response.data["id"],
                     firstName: response.data["localizedFirstName"],
                     lastName: response.data["localizedLastName"],
                     profileImageURL: response.data.profilePicture["displayImage~"].elements[0].identifiers[0].identifier
@@ -119,28 +111,8 @@ app.get('/getUserCredentialsTokenIncorrecto', function (req, res) {
 })
 
 
-function publishContent(req, linkedinId, content, token) {
+function publishContent(body, token) {
     const url = 'https://api.linkedin.com/v2/shares';
-    const { title, text, shareUrl, shareThumbnailUrl } = content;
-    const body = {
-        owner: 'urn:li:person:' + linkedinId,
-        subject: title,
-        text: {
-            text: text
-        },
-        content: {
-            contentEntities: [{
-                entityLocation: shareUrl,
-                thumbnails: [{
-                    resolvedUrl: shareThumbnailUrl
-                }]
-            }],
-            title: title
-        },
-        distribution: {
-            linkedInDistributionTarget: {}
-        }
-    };
     const headers = {
         'Authorization': 'Bearer ' + token,
         'cache-control': 'no-cache',
@@ -220,6 +192,7 @@ function getUserEmail(accessToken) {
  */
 function userBuilder(userProfile, userEmail) {
     return {
+        id: userProfile.id,
         firstName: userProfile.firstName,
         lastName: userProfile.lastName,
         profileImageURL: userProfile.profileImageURL,

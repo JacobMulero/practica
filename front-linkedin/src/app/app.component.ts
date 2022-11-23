@@ -16,6 +16,8 @@ export class AppComponent implements OnInit {
     firstName: undefined,
     lastName: undefined,
     email: undefined,
+    id: undefined
+
   }
   public fecha_expiracion: any;
   private code: any;
@@ -87,13 +89,38 @@ export class AppComponent implements OnInit {
   }
 
   public postData():any {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + this.token,
-    });
-    this.http.post('https://api.linkedin.com/v2/posts',{
+    var token = this.token;
+    var idUser = this.user.id;
 
-    }, {headers:headers})
+    this.http.post(environment.baseURL + '/publish',{
+      userid: this.user.id,
+      token: token,
+      contenido: {
+      "author": "urn:li:person:" + this.user.id,
+      "lifecycleState": "PUBLISHED",
+      "specificContent": {
+      "com.linkedin.ugc.ShareContent": {
+        "shareCommentary": {
+          "text": "A text from LinkedIn API."
+        },
+        "shareMediaCategory": "ARTICLE",
+          "media": [
+          {
+            "status": "READY",
+            "description": {
+              "text": "The description field coming from LinkedIn API."
+            },
+            "originalUrl": "https://blog.linkedin.com/",
+            "title": {
+              "text": "Testing LinkedIn API"
+            }
+          }
+        ]
+      }
+    },
+      "visibility": {
+      "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+    }}})
 
       .subscribe(res => {
 
